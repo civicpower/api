@@ -1,0 +1,105 @@
+################### APACHE  ###################
+
+# Force disable directory browsing
+	Options All -Indexes
+	
+# Init
+	<IfModule mod_rewrite.c>
+		RewriteEngine on
+	</IfModule>
+
+# Include the php conf on all pages
+	# https://stackoverflow.com/questions/9045445/auto-prepend-php-file-using-htaccess-relative-to-htaccess-file
+	php_value include_path "./:../:../../:../../../:../../../../"
+	#php_value include_path "../"
+	# https://stackoverflow.com/questions/9045445/auto-prepend-php-file-using-taccess-relative-to-htaccess-file
+	php_value auto_prepend_file inc/auto_prepend_file.php
+	#php_value auto_append_file auto_append_file.php
+
+# Robots.txt
+	<IfModule mod_rewrite.c>
+		#RewriteBase /
+		RewriteRule ^robots.txt$ robots.php
+	</IfModule>
+
+# Deny access to .htaccess
+	<Files .htaccess>
+		Order allow,deny
+		Deny from all
+	</Files>
+
+# Deny access to filenames starting with dot(.)
+	<FilesMatch "^\.">
+		Order allow,deny
+		Deny from all
+	</FilesMatch>
+
+# Deny Access to Backup and Source Files
+# These files may be left by some text/HTML editors (like Vi/Vim) and pose a great security danger if exposed to public.
+	<FilesMatch "(\.(bak|config|dist|fla|inc|ini|log|txt|psd|sh|sql|swp)|~)$">
+	    # Require all denied
+	</FilesMatch>
+
+# Error case
+	ErrorDocument 401 /index.php
+	ErrorDocument 402 /index.php
+	ErrorDocument 403 /index.php
+	ErrorDocument 404 /index.php
+	ErrorDocument 500 /index.php
+	ErrorDocument 501 /index.php
+	ErrorDocument 502 /index.php
+	ErrorDocument 503 /index.php
+	ErrorDocument 504 /index.php
+
+################### APP CONFIG  ###################
+
+# CRON /cron/batch name/
+	<IfModule mod_rewrite.c>
+		RewriteRule ^cron/(.*)/(.*)?$ ?mode=cron&batch=$1&params=$2 [L,QSA]
+    </IfModule>
+
+# Check for PHP extension
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteCond %{DOCUMENT_ROOT}/$1.php -f
+	RewriteRule ^(.*)$ /$1.php [L]
+
+# API BC /PHAPI_1.0/JSON/
+	<IfModule mod_rewrite.c>
+		RewriteRule ^PHAPI_1\.0/(JSON|XML|HTML)/(.*)?$ ?mode=api&format=$1&call=$2 [L,QSA]
+    </IfModule>
+
+################### IP BAN  ###################
+
+#       Deny from 62.192.157.167
+
+        RewriteEngine on
+        RewriteCond %{REMOTE_ADDR} ^93.115.96.55
+        RewriteRule (.*) https://en.wikipedia.org/wiki/Wikipedia:Go_ahead,_vandalize [R=301,L]
+        #Deny from 93.115.96.55
+
+        #RewriteCond %{REMOTE_ADDR} ^82.251.101.177
+        #RewriteRule (.*) https://en.wikipedia.org/wiki/Wikipedia:Go_ahead,_vandalize [R=301,L]
+        #Deny from 82.251.101.177
+
+
+################### SECU  ###################
+
+# Avoid some files && folders
+	Redirect 301 /package-lock.json /
+	Redirect 301 /composer.lock /
+	Redirect 301 /composer.phar /
+	Redirect 301 /.htaccess~ /
+	Redirect 301 /.htaccess /
+	Redirect 301 .gitignore /
+	Redirect 301 .gitignore~ /
+	Redirect 301 /assets/ /
+	Redirect 301 /.git/ /
+	Redirect 301 /phosphoreCore/ /
+	Redirect 301 /siimpleCore/ /
+	Redirect 301 /htm/ /
+	Redirect 301 /modules/ /
+	RedirectMatch 301 ^/images/?$ /
+	#RedirectMatch 403 ^/images/?$
+	RedirectMatch 301 ^/images/upload/?$ /
+
