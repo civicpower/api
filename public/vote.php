@@ -49,12 +49,12 @@ if (mapi_post_mandatory("token", "option_list")) {
                         foreach ($ballots as $ballot_id => $tab_question) {
                             $bid = $ballot_id;
                             foreach ($tab_question as $question_id => $tab_option) {
-                                if(count($tab_option)==1 && $tab_option[0]['option_can_be_deleted']==0){
+                                if(count($tab_option)==1 && $tab_option[0]['option_can_be_disabled']==1){
 
                                 }else {
                                     $nb_fixe = 0;
                                     foreach($tab_option as $kk => $vv){
-                                        if($vv['option_can_be_deleted']==0){
+                                        if($vv['option_can_be_disabled']==1){
                                             $nb_fixe++;
                                         }
                                     }
