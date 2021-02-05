@@ -24,7 +24,23 @@ if(mapi_post_mandatory("ballot_token")) {
                 $ballot['can_vote'] = 0;
             }
         }
-        mapi_success("ballot", "Ballot Info", $ballot);
+        $ok = true;
+        if(isset($ballot['can_vote']) && $ballot['can_vote']==0){
+            $nb_bfilter_all = intval(sql_unique("
+                SELECT COUNT(*) AS nb
+                FROM bal_filter
+                WHERE bfilter_ballot_id = '".for_db($ballot['ballot_id'])."'
+                AND bfilter_all = '1'
+                AND bfilter_active = '1'
+            "));
+            if($nb_bfilter_all <= 0){
+                $ok = false;
+                mapi_error("unknown_ballot", "Consultation introuvable");
+            }
+        }
+        if($ok) {
+            mapi_success("ballot", "Ballot Info", $ballot);
+        }
     }
 }
 ?>

@@ -1,4 +1,13 @@
 <?php
+function get_ip() {
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        return $_SERVER['HTTP_CLIENT_IP'];
+    } 
+    elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) { 
+        return $_SERVER['HTTP_X_FORWARDED_FOR'];
+    }
+    else { return $_SERVER['REMOTE_ADDR']; }
+}
 function get_token_blockchain(){
     return sql_shift("SELECT count(*) as count, token FROM `".for_db($_ENV['MYSQL_BASE_BLOCKCHAIN'])."`.`auth0_token`"." WHERE `date` >= SUBDATE(NOW(),1)");
 }
@@ -104,6 +113,60 @@ function civicpower_check_token_user($token,$errorize=true) {
         $res["steps"] = civicpower_get_steps($user);
     }
     return $res;
+}
+function civicpower_clear_data(&$tab) {
+    static $unset = null;
+    if(!is_array($tab) || count($tab)<=0){
+        return;
+    }
+    if(is_null($unset)){
+        $unset = [
+            "user_salt",
+            "user_email_pending",
+            "user_phone_national_pending",
+            "user_phone_dial_pending",
+            "user_phone_international_pending",
+            "user_creation",
+            "user_last_connect",
+            "user_code_validation_phone",
+            "user_code_validation_email",
+            "user_emailcode_send",
+            "user_nb_login",
+            "user_nb_fail",
+            "user_nb_active_ballot_allowed",
+            "user_is_admin",
+            "user_active",
+            "user_creation_date",
+            "user_update_date",
+            "user_creation_ip",
+            "user_creation_agent",
+            "user_creation_referer",
+            "user_ban",
+            "user_max_sms_day",
+            "user_welcome_sent",
+            "ballot_asap",
+            "ballot_active",
+            "ballot_rejection_reason",
+            "ballot_acceptation_reason",
+            "ballot_creation_date",
+            "ballot_update_date",
+            "ballot_rappel_done",
+            "option_creation_date",
+        ];
+    }
+    foreach($tab as $k => &$v){
+        if(is_array($v) && count($v)>0){
+            civicpower_clear_data($v);
+        }else {
+            if (in_array($k, $unset)) {
+                unset($tab[$k]);
+            }else if($k=="user_password"){
+                if(is_string($v) && strlen($v)>0) {
+                    $tab[$k] = "password-set";
+                }
+            }
+        }
+    }
 }
 function civicpower_inner_filter($view_public=true) {
     $res = [];
@@ -387,9 +450,9 @@ function civicpower_user_id_to_user_salt($user_id) {
 }
 function civicpower_hash_db($sql_language, $string, $salt = "") {
     if ($sql_language) {
-        return "SHA1(CONCAT($string,'" . for_db($_ENV['GLOBAL_SALT']) . "','" . for_db($salt) . "'))";
+        return "SHA2(CONCAT($string,'" . for_db($_ENV['GLOBAL_SALT']) . "','" . for_db($salt) . "'),256)";
     } else {
-        return sha1("" . $string . $_ENV['GLOBAL_SALT'] . $salt);
+        return hash('sha256',"" . $string . $_ENV['GLOBAL_SALT'] . $salt);
     }
 }
 /* 
@@ -407,9 +470,9 @@ function civicpower_hash_db($sql_language, $string, $salt = "") {
  */
 function civicpower_hash_user($sql_language, $string, $salt = "") {
     if ($sql_language) {
-        return "SHA1(CONCAT($string,'".for_db($_ENV['SALT_USER'])."'))";
+        return "SHA2(CONCAT($string,'".for_db($_ENV['SALT_USER'])."'),256)";
     } else {
-        return sha1("" . $string . $_ENV['SALT_USER']);
+        return hash('sha256',"" . $string . $_ENV['SALT_USER']);
     }
 }
 
@@ -438,10 +501,11 @@ function civicpower_send_email($email="",$subject="", $text="",$user_id="") {
     // Call internal SMS GW
         $post = "email=".$email
             ."&subject=".$subject
-            ."&text=".$text
+            ."&text="   .$text
+            ."&ip="     .get_ip()
             ."&user_id=".$user_id;
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL,$_ENV["INTERNAL_GW_URL"]."/GW_1.0/mail/");
+        curl_setopt($ch, CURLOPT_URL,$_ENV["INTERNAL_GW_URL"]."/gateway/mail/");
         curl_setopt($ch, CURLOPT_POST,1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
@@ -467,7 +531,7 @@ function civicpower_send_email($email="",$subject="", $text="",$user_id="") {
 }
 
 function civicpower_free_user_salt() {
-    $salt   = sha1(uniqid().mt_rand(0,9999).time());
+    $salt   = hash('sha256',bin2hex(random_bytes(64)));
     $nb     = intval(sql_unique("
         SELECT COUNT(*) AS nb
         FROM usr_user
@@ -491,28 +555,35 @@ function civicpower_free_user_salt() {
                     allowing to change our provider anytime without any impact on the app
 */
 function civicpower_send_sms($mobile_phone_number, $text, $user_id="", $sender = "Civicpower") {
+
     // Call internal SMS GW
         $post = "mobile_phone_number=".$mobile_phone_number
             ."&text=".$text
             ."&user_id=".$user_id
             ."&sender=".$sender;
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL,$_ENV["INTERNAL_GW_URL"]."/GW_1.0/sms/");
+        curl_setopt($ch, CURLOPT_URL,$_ENV["INTERNAL_GW_URL"]."/gateway/sms/");
         curl_setopt($ch, CURLOPT_POST,1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
         curl_setopt($ch, CURLOPT_VERBOSE,true);
         $result = curl_exec ($ch);
         $curlresponse = json_decode($result, true);
+
     // Return
         switch (true) {
             case (isset($curlresponse['res'])):
+                if ($curlresponse['res']["status"]<>"success") {
+                    error_log("   -> error SMS : ".serialize($curlresponse['res']),3,$_ENV["LOG_ERROR_CRITICAL"]);
+                }
                 return $curlresponse['res'];
                 break;
             case (isset($curlresponse['parameter_missing'])):
+                error_log("   -> error SMS parameter_missing : ".$curlresponse['parameter_missing'],3,$_ENV["LOG_ERROR_CRITICAL"]);
                 return FALSE;
                 break;
             case (isset($curlresponse['quota'])):
+                error_log("   -> error SMS quota : ".$curlresponse['quota'],3,$_ENV["LOG_ERROR_CRITICAL"]);
                 return FALSE;
                 break;
             default:

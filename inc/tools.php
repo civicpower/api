@@ -1,9 +1,7 @@
 <?php
-if (true) {
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
-    error_reporting(E_ALL);
-}
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 $no_fw = true;
 $disable_https_redirect = true;
 $no_session = true;
@@ -38,6 +36,7 @@ function mapi_error($code, $message, $data = null) {
     $res['code'] = $code;
     $res['message'] = $message;
     if (!is_null($data)) {
+        civicpower_clear_data($data);
         $res['data'] = $data;
     }
     mapi_show_json($res);
@@ -47,6 +46,7 @@ function mapi_success($code, $message, $data = null) {
     $res['code'] = $code;
     $res['message'] = $message;
     if (!is_null($data)) {
+        civicpower_clear_data($data);
         $res['data'] = $data;
     }
     mapi_show_json($res);

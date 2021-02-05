@@ -1,6 +1,4 @@
 <?php
-error_log("AAA");
-error_log(vardump($_POST["token"]));
 if(mapi_post_mandatory("token","id")) {
 // Call for IB.io if auth0 token is okay
 	if (gpost("token")==get_token_blockchain()['token']) {

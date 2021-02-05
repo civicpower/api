@@ -59,8 +59,8 @@ if(mapi_post_mandatory(
                         user_phone_dial_pending = '',
                         user_phone_national_pending = '',
                         user_phone_international_pending = '',
-                        user_code_validation_email = '".for_db(rand(1000,9999))."',
-                        user_code_validation_phone = '".for_db(rand(1000,9999))."'
+                        user_code_validation_email = '".for_db(random_int(1000,9999))."',
+                        user_code_validation_phone = '".for_db(random_int(1000,9999))."'
                     WHERE user_id = '" . for_db($user['user_id']) . "'
                 ");
                 civicpower_invoke_login($user['user_id']);

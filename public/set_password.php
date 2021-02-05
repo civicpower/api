@@ -7,7 +7,7 @@ if(mapi_post_mandatory("token","password")) {
         if ($check["result"] == false) {
             mapi_error("password_error", $check['error']);
         }else {
-            $new_pass = sha1($_ENV['GLOBAL_SALT'] . $password);
+            $new_pass = hash('sha256',$_ENV['GLOBAL_SALT'] . $password);
             $old_pass = sql_unique("
                 SELECT user_password
                 FROM usr_user

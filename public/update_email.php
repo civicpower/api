@@ -11,7 +11,7 @@ if(mapi_post_mandatory("email", "token")) {
                     if (isset($user['user_code_validation_email']) && is_numeric($user['user_code_validation_email']) && $user['user_code_validation_email'] > 0) {
                         $code = $user['user_code_validation_email'];
                     } else {
-                        $code = rand(1000, 9999);
+                        $code = random_int(1000, 9999);
                     }
                     sql("
                         UPDATE usr_user SET

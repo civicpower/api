@@ -19,7 +19,7 @@ if(mapi_post_mandatory(
                     AND user_active = '1' AND user_ban = '0'
                 ";
                 $user = sql_shift($sql);
-                $code = rand(1000, 9999);
+                $code = random_int(1000, 9999);
                 if (!is_array($user) || count($user) <= 0) {
                     sql("
                         INSERT INTO usr_user SET

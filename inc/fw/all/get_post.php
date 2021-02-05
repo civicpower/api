@@ -116,19 +116,6 @@ function gcookie($what=null){
 function gsession($what=null){
 	return gsomething($_SESSION,$what);
 }
-function remember($lib,$value=null){
-	if(!is_null($value)){
-		$_SESSION[$lib]=$value;
-		setcookie($lib,$value,time()+265*24*3600*10,'/');
-	}else{
-		if(session_exists($lib)){
-			return gsession($lib);
-		}elseif(cookie_exists($lib)){
-			return gcookie($lib);
-		}
-	}
-	return '';
-}
 function file_post_contents($url,$headers=false) {
     $url = parse_url($url);
 	//print_r($url);echo BN.BN;

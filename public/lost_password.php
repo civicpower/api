@@ -29,7 +29,7 @@ if (mapi_post_mandatory("username")) {
             }
             $code_set = true;
             if (strlen($code) <= 0) {
-                $code = rand(1000, 9999);
+                $code = random_int(1000, 9999);
                 $code_set = local_set_confirmation_code($user['user_id'], $mode, $code);
             }
             if ($code_set) {

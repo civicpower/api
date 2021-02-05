@@ -13,7 +13,7 @@ if(mapi_post_mandatory("dial_code", "phone_number_national", "phone_number_inter
                     if (isset($user['user_code_validation_phone']) && is_numeric($user['user_code_validation_phone']) && $user['user_code_validation_phone'] > 0) {
                         $code = $user['user_code_validation_phone'];
                     } else {
-                        $code = rand(1000, 9999);
+                        $code = random_int(1000, 9999);
                     }
                     sql("
                         UPDATE usr_user SET

@@ -8,7 +8,6 @@ function printr($var,$title='PRINTR',$n=0,$opened=false){
 		}
 	}
 	$res = array();
-	$divid = md5(uniqid(rand(), true));
 	if($n<10){
 		$res[] = '<!--{literal}--><fieldset class="printr_'.($opened?'op':'cl').'">';
 		$res[] = '<legend onclick="printr_switch(this)">'.for_html($title).'</legend>';
@@ -36,9 +35,6 @@ function printr($var,$title='PRINTR',$n=0,$opened=false){
 }
 function printr_true($tab,$title='PRINTR'){
 	return printr($tab,$title,1);
-}
-function pt($tab,$title='PRINTR'){
-	return printr_true($tab,$title);
 }
 function printr2($elem){
     echo '<pre>';

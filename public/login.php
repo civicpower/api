@@ -5,7 +5,7 @@ if(mapi_post_mandatory(
 )) {
     $username = civicpower_no_space_word(gpost("username"));
     $password = trim(gpost("password"));
-    $pass_hash = sha1($_ENV['GLOBAL_SALT'] . $password);
+    $pass_hash = hash('sha256',$_ENV['GLOBAL_SALT'] . $password);
 
     if (!civicpower_phone_valid($username) && !civicpower_is_email($username)) {
         mapi_error("login_error", "Mauvaises informations de connexion.");

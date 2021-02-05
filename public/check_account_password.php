@@ -31,7 +31,7 @@ if(mapi_post_mandatory("username")) {
             $code = null;
             $has_pass = strlen($pass_hash) > 0 ? "yes" : "no";
             if ($has_pass == "no") {
-                $code = rand(1000, 9999);
+                $code = random_int(1000, 9999);
                 if ($mode == "email") {
                     if (isset($user['user_code_validation_email']) && strlen($user['user_code_validation_email']) > 0) {
                         $code = $user['user_code_validation_email'];
@@ -40,6 +40,19 @@ if(mapi_post_mandatory("username")) {
                     if (isset($user['user_code_validation_phone']) && strlen($user['user_code_validation_phone']) > 0) {
                         $code = $user['user_code_validation_phone'];
                     }
+                }
+                if($mode == "email"){
+                    sql("
+                        UPDATE usr_user SET
+                        user_code_validation_email = '".for_db($code)."'
+                        WHERE user_id = '" . for_db($user['user_id']) . "'
+                    ");
+                }else{
+                    sql("
+                        UPDATE usr_user SET
+                        user_code_validation_phone = '".for_db($code)."'
+                        WHERE user_id = '" . for_db($user['user_id']) . "'
+                    ");
                 }
                 if (cp_serveur_can_send_sms()) {
                     if ($mode == "email") {
