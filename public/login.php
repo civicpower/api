@@ -44,4 +44,3 @@ if(mapi_post_mandatory(
         }
     }
 }
-?>

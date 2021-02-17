@@ -1,13 +1,4 @@
 <?php
-function get_ip() {
-    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-        return $_SERVER['HTTP_CLIENT_IP'];
-    } 
-    elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) { 
-        return $_SERVER['HTTP_X_FORWARDED_FOR'];
-    }
-    else { return $_SERVER['REMOTE_ADDR']; }
-}
 function get_token_blockchain(){
     return sql_shift("SELECT count(*) as count, token FROM `".for_db($_ENV['MYSQL_BASE_BLOCKCHAIN'])."`.`auth0_token`"." WHERE `date` >= SUBDATE(NOW(),1)");
 }
@@ -501,8 +492,7 @@ function civicpower_send_email($email="",$subject="", $text="",$user_id="") {
     // Call internal SMS GW
         $post = "email=".$email
             ."&subject=".$subject
-            ."&text="   .$text
-            ."&ip="     .get_ip()
+            ."&text=".$text
             ."&user_id=".$user_id;
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL,$_ENV["INTERNAL_GW_URL"]."/gateway/mail/");

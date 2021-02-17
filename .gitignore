@@ -1,0 +1,13 @@
+.idea/*
+#assets/*
+#vendor/*
+.project
+.DS_Store
+*.DS_Store
+#.htaccess
+.htpasswd
+.project
+#.gitignore
+composer.lock
+composer.phar
+*~
