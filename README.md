@@ -18,3 +18,5 @@ L'implémentation actuelle sur notre plateforme civicpower.io est très simple :
 - mail : sendinblue
 - front : php (sans framework), javascript
 - configuration : voir fichier env exemple
+
+Le schéma de la base de donnée est dans /assets/
