@@ -12,7 +12,7 @@ if ( ($dbHash = get_token_blockchain()) <> FALSE ) {
 					CURLOPT_TIMEOUT 		=> 30,
 					CURLOPT_HTTP_VERSION 	=> CURL_HTTP_VERSION_1_1,
 					CURLOPT_CUSTOMREQUEST 	=> "POST",
-					CURLOPT_POSTFIELDS 		=> "grant_type=client_credentials&client_id=J5ru8HCjijJxOWv6hSQj7m5PvO4Bu7Rr&client_secret=Ph62kYUtX-NZGew_I7eGWvQNWI3B5OkwhJTFlL3nWQkZkr6qeG7ngfPZMytLMMg1&audience=/v1/lum9gqkn",
+					CURLOPT_POSTFIELDS 		=> "grant_type=client_credentials&client_id=".$_ENV['CIVICPOWER_INBLOCKS_BLOCKCHAIN_CLIENT_SECRET']."&client_secret=".$_ENV['CIVICPOWER_INBLOCKS_BLOCKCHAIN_CLIENT_ID']."&audience=/v1/".$_ENV['CIVICPOWER_INBLOCKS_BLOCKCHAIN'],
 					CURLOPT_HTTPHEADER 		=> [
 				    	"content-type: application/x-www-form-urlencoded"
 				    ],
